@@ -28,11 +28,11 @@ const app = new Hono()
                 path: "/",
                 httpOnly: true,
                 secure: true,
-                sameSite: "strict",
+                sameSite: "lax",
                 maxAge: 60 * 60 * 24 * 30
             })
 
-            return c.json({ success: true })
+            return c.json({ success: true, cookie: session.secret })
         }
     )
     .post("/register", zValidator("json", registerSchema), async (c) => {
