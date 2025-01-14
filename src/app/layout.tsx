@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+import { zhCN } from "@clerk/localizations";
 
 import { cn } from "@/lib/utils";
 import Providers from "@/components/query-provider";
@@ -19,11 +21,20 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
-			<body className={cn(inter.className, "antialiased min-h-screen")}>
-				<Toaster />
-				<Providers>{children}</Providers>
-			</body>
-		</html>
+		<ClerkProvider
+			localization={zhCN}
+			appearance={{
+				variables: {
+					fontSize: "16px",
+				},
+			}}
+		>
+			<html lang="en">
+				<body className={cn(inter.className, "antialiased min-h-screen")}>
+					<Toaster />
+					<Providers>{children}</Providers>
+				</body>
+			</html>
+		</ClerkProvider>
 	);
 }

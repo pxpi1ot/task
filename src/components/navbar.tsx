@@ -1,6 +1,7 @@
 "use client";
 
-import { UserButton } from "@/features/auth/components/user-button";
+import { SignedIn, UserButton } from "@clerk/nextjs";
+
 import { MobileSidebar } from "./mobile-sidebar";
 import { usePathname } from "next/navigation";
 
@@ -34,7 +35,9 @@ export const Navbar = () => {
 				<p className="text-muted-foreground">{description}</p>
 			</div>
 			<MobileSidebar />
-			<UserButton />
+			<SignedIn>
+				<UserButton />
+			</SignedIn>
 		</nav>
 	);
 };

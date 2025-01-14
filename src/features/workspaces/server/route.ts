@@ -25,7 +25,7 @@ const app = new Hono()
             const members = await databases.listDocuments(
                 DATABASE_ID,
                 MEMBERS_ID,
-                [Query.equal("userId", user.$id)]
+                [Query.equal("userId", user.id)]
             )
 
             if (members.total === 0) {
@@ -55,7 +55,7 @@ const app = new Hono()
                 {
                     databases,
                     workspaceId,
-                    userId: user.$id
+                    userId: user.id
                 }
             )
 
@@ -128,17 +128,21 @@ const app = new Hono()
                 ID.unique(),
                 {
                     name,
-                    userId: user.$id,
+                    userId: user.id,
                     imageUrl: uploadedImageUrl,
                     inviteCode: generateInviteCode(6)
                 }
             )
 
-            await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
-                userId: user.$id,
-                workspaceId: workspace.$id,
-                role: MemberRole.ADMIN
-            })
+            await databases.createDocument(
+                DATABASE_ID,
+                MEMBERS_ID,
+                ID.unique(),
+                {
+                    userId: user.id,
+                    workspaceId: workspace.$id,
+                    role: MemberRole.ADMIN
+                })
 
             return c.json({ data: workspace })
         }
@@ -155,7 +159,7 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId,
-                userId: user.$id
+                userId: user.id
             })
 
             if (!member || member.role !== MemberRole.ADMIN) {
@@ -205,7 +209,7 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId,
-                userId: user.$id
+                userId: user.id
             })
 
             if (!member || member.role !== MemberRole.ADMIN) {
@@ -232,7 +236,7 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId,
-                userId: user.$id
+                userId: user.id
             })
 
             if (!member || member.role !== MemberRole.ADMIN) {
@@ -263,13 +267,11 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId,
-                userId: user.$id,
+                userId: user.id,
             })
-
             if (member) {
                 return c.json({ error: "已是该工作区成员" }, 500)
             }
-
             const workspace = await databases.getDocument<Workspace>(
                 DATABASE_ID,
                 WORKSPACES_ID,
@@ -286,7 +288,7 @@ const app = new Hono()
                 ID.unique(),
                 {
                     workspaceId,
-                    userId: user.$id,
+                    userId: user.id,
                     role: MemberRole.MEMBER
                 }
             )
@@ -305,12 +307,13 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId,
-                userId: user.$id
+                userId: user.id
             })
 
             if (!member) {
                 return c.json({ error: "您不是该工作区管理员！" }, 401)
             }
+
 
             const now = new Date()
             const thisMonthStart = startOfMonth(now);
@@ -351,7 +354,7 @@ const app = new Hono()
                 TASKS_ID,
                 [
                     Query.equal("workspaceId", workspaceId),
-                    Query.equal("assigneeId", member.$id),
+                    Query.equal("assigneeId", member.userId),
                     Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
                     Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString())
                 ]
@@ -362,7 +365,7 @@ const app = new Hono()
                 TASKS_ID,
                 [
                     Query.equal("workspaceId", workspaceId),
-                    Query.equal("assigneeId", member.$id),
+                    Query.equal("assigneeId", member.userId),
                     Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
                     Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString())
                 ]
@@ -456,6 +459,8 @@ const app = new Hono()
             const overdueTaskCount = thisMonthOverdueTasks.total
             const overdueTaskDifference = overdueTaskCount - lastMonthOverdueTasks.total
 
+
+
             return c.json({
                 data: {
                     taskCount,
@@ -470,6 +475,8 @@ const app = new Hono()
                     overdueTaskDifference
                 }
             })
+
+
         }
     )
 export default app

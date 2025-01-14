@@ -1,9 +1,9 @@
 import { CreateWorkspaceForm } from "@/features/workspaces/components/create-workspace-form";
-import { getCurrent } from "@/features/auth/queries";
 import { redirect } from "next/navigation";
+import { currentUser } from "@clerk/nextjs/server";
 
 const WorkspaceCreatePage = async () => {
-	const user = await getCurrent();
+	const user = await currentUser();
 
 	if (!user) redirect("/sign-in");
 

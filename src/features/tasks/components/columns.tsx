@@ -69,8 +69,12 @@ export const columns: ColumnDef<Task>[] = [
 			const assignee = row.original.assignee;
 			return (
 				<div className="flex items-center gap-x-2 text-sm font-medium">
-					<MemberAvatar name={assignee.name} fallbackClassName="text-xs" />
-					<p className="line-clamp-1">{assignee.name}</p>
+					<MemberAvatar
+						imageUrl={assignee.imageUrl}
+						name={assignee?.name}
+						fallbackClassName="text-xs"
+					/>
+					<p className="line-clamp-1">{assignee?.name}</p>
 				</div>
 			);
 		},

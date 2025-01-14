@@ -1,10 +1,9 @@
-import { getCurrent } from "@/features/auth/queries";
 import { getWorkspaces } from "@/features/workspaces/queries";
-
+import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
-	const user = await getCurrent();
+	const user = await currentUser();
 
 	if (!user) redirect("/sign-in");
 

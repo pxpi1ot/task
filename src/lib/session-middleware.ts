@@ -12,10 +12,9 @@ import {
     type Storage as StorageType
 } from "node-appwrite";
 
-import { getCookie } from "hono/cookie";
+import { currentUser, User } from "@clerk/nextjs/server";
 import { createMiddleware } from "hono/factory";
 
-import { AUTH_COOKIE } from "@/features/auth/constants";
 
 
 type AdditionalContext = {
@@ -24,7 +23,7 @@ type AdditionalContext = {
         databases: DatabasesType
         storage: StorageType
         users: UsersType
-        user: Models.User<Models.Preferences>
+        user: User
     }
 }
 
@@ -35,23 +34,24 @@ export const sessionMiddleware = createMiddleware<AdditionalContext>(
             .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
             .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!)
 
-        const session = getCookie(c, AUTH_COOKIE)
 
-        if (!session) {
+        const user = await currentUser();
+
+        if (!user) {
             return c.json({ error: "Unauthoried" }, 401)
         }
 
 
-        client.setSession(session)
 
-        const account = new Account(client)
+
+
         const databases = new Databases(client)
         const storage = new Storage(client)
 
-        const user = await account.get();
+
 
         //挂载到 Context
-        c.set("account", account)
+
         c.set("databases", databases)
         c.set("storage", storage)
         c.set("user", user)

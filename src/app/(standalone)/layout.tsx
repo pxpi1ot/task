@@ -1,4 +1,5 @@
-import { UserButton } from "@/features/auth/components/user-button";
+import { SignedIn, UserButton } from "@clerk/nextjs";
+
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -15,7 +16,9 @@ const StandaloneLayout = ({ children }: StandaloneLayoutProps) => {
 					<Link href="/">
 						<Image src="/logo.svg" width={45} height={45} alt="logo" />
 					</Link>
-					<UserButton />
+					<SignedIn>
+						<UserButton />
+					</SignedIn>
 				</nav>
 				<div className="flex flex-col items-center justify-center py-4">
 					{children}

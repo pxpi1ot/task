@@ -23,14 +23,16 @@ import { zhCN } from "date-fns/locale";
 import { CalendarIcon, PlusIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 
-export const WorkspaceIdClient = () => {
+export const WorkspaceIdClient = ({ userId }: { userId: string }) => {
 	const workspaceId = useWorkspaceId();
 
 	const { data: analytics, isLoading: isLoadingAnalytics } =
 		useGetWorkspaceAnalytics({ workspaceId });
 	const { data: tasks, isLoading: isLoadingTasks } = useGetTasks({
 		workspaceId,
+		assigneeId: userId,
 	});
+
 	const { data: projects, isLoading: isLoadingProjects } = useGetProjects({
 		workspaceId,
 	});
@@ -95,10 +97,14 @@ export const TaskList = ({ data, total }: TaskListProps) => {
 											<div className="size-1 rounded-full bg-neutral-300" />
 											<div className="text-sm text-muted-foreground flex items-center">
 												<CalendarIcon className="size-3 mr-1.5" />
-												<span className="truncate ">
-													{formatDistanceToNow(new Date(task.dueDate), {
-														locale: zhCN,
-													})}
+												<span className="truncate">
+													{new Date() < new Date(task.dueDate) ? (
+														formatDistanceToNow(new Date(task.dueDate), {
+															locale: zhCN,
+														})
+													) : (
+														<span className="text-red-500">已逾期</span>
+													)}
 												</span>
 											</div>
 										</div>
@@ -194,7 +200,11 @@ export const MemberList = ({ data, total }: MemberListProps) => {
 						<li key={member.$id}>
 							<Card className="shadow-none rounded-lg overflow-hidden">
 								<CardContent className="p-3 flex flex-col items-center gap-x-2">
-									<MemberAvatar className="size-12" name={member.name} />
+									<MemberAvatar
+										className="size-12"
+										name={member.name}
+										imageUrl={member.imageUrl}
+									/>
 									<div className="flex flex-col items-center overflow-hidden">
 										<p className="text-lg font-medium line-clamp-1">
 											{member.name}

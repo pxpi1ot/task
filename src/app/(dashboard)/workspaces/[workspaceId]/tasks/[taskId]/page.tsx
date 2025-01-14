@@ -1,9 +1,9 @@
-import { getCurrent } from "@/features/auth/queries";
 import { TaskIdClient } from "./client";
 import { redirect } from "next/navigation";
+import { currentUser } from "@clerk/nextjs/server";
 
 const TaskIdPage = async () => {
-	const user = await getCurrent();
+	const user = await currentUser();
 	if (!user) redirect("/sign-in");
 
 	return <TaskIdClient />;

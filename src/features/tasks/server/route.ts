@@ -1,3 +1,4 @@
+import { currentUser } from '@clerk/nextjs/server';
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
@@ -9,6 +10,7 @@ import { z } from "zod";
 import { Task, TaskStatus } from "../types";
 import { createAdminClient } from "@/lib/appwrite";
 import { Project } from "@/features/projects/types";
+import { Member } from '@/features/members/types';
 
 const app = new Hono()
     .get("/", sessionMiddleware, zValidator("query",
@@ -27,7 +29,7 @@ const app = new Hono()
 
             const { workspaceId, projectId, assigneeId, status, search, dueDate } = c.req.valid("query")
 
-            const member = await getMember({ databases, workspaceId, userId: user.$id })
+            const member = await getMember({ databases, workspaceId, userId: user.id })
 
             if (!member) {
                 return c.json({ error: "未授权" }, 401)
@@ -58,12 +60,13 @@ const app = new Hono()
                 console.log("search", search)
                 query.push(Query.search("search", search))
             }
+
+
             const tasks = await databases.listDocuments<Task>(
                 DATABASE_ID,
                 TASKS_ID,
                 query
             )
-
             const projectIds = tasks.documents.map((task) => task.projectId)
             const assigneeIds = tasks.documents.map((task) => task.assigneeId)
 
@@ -72,27 +75,29 @@ const app = new Hono()
                 PROJECTS_ID,
                 projectIds.length > 0 ? [Query.contains("$id", projectIds)] : []
             )
-            const members = await databases.listDocuments(
+
+            const members = await databases.listDocuments<Member>(
                 DATABASE_ID,
                 MEMBERS_ID,
-                assigneeIds.length > 0 ? [Query.contains("$id", assigneeIds)] : []
+                assigneeIds.length > 0 ? [Query.contains("userId", assigneeIds)] : []
             )
 
             const assignees = await Promise.all(
                 members.documents.map(async (member) => {
-                    const user = await users.get(member.userId)
+                    const user = await users.getUser(member.userId)
 
                     return {
                         ...member,
-                        name: user.name || user.email,
-                        email: user.email
+                        name: user.username || user.emailAddresses[0].emailAddress,
+                        email: user.emailAddresses[0].emailAddress,
+                        imageUrl: user.imageUrl
                     }
                 })
             )
 
             const populatedTasks = tasks.documents.map((task) => {
                 const project = projects.documents.find(project => project.$id === task.projectId)
-                const assignee = assignees.find(assignee => assignee.$id === task.assigneeId)
+                const assignee = assignees.find(assignee => assignee.userId === task.assigneeId)
 
                 return {
                     ...task,
@@ -120,7 +125,7 @@ const app = new Hono()
             const currentMember = await getMember({
                 databases,
                 workspaceId: task.workspaceId,
-                userId: currentUser.$id
+                userId: currentUser.id
             })
 
 
@@ -139,12 +144,12 @@ const app = new Hono()
                 task.assigneeId
             )
 
-            const user = await users.get(member.userId)
+            const user = await users.getUser(member.userId)
 
             const assignee = {
                 ...member,
-                name: user.name || user.email,
-                email: user.email
+                name: user.username || user.emailAddresses[0].emailAddress,
+                email: user.emailAddresses[0].emailAddress
             }
 
             return c.json({
@@ -162,7 +167,7 @@ const app = new Hono()
             const databases = c.get("databases")
             const { name, status, workspaceId, projectId, dueDate, assigneeId } = c.req.valid("json")
 
-            const member = await getMember({ databases, workspaceId, userId: user.$id })
+            const member = await getMember({ databases, workspaceId, userId: user.id })
 
             if (!member) {
                 return c.json({ error: "未授权" }, 401)
@@ -212,7 +217,7 @@ const app = new Hono()
                 TASKS_ID,
                 taskId
             )
-            const member = await getMember({ databases, workspaceId: task.workspaceId, userId: user.$id })
+            const member = await getMember({ databases, workspaceId: task.workspaceId, userId: user.id })
 
             if (!member) {
                 return c.json({ error: "未授权" }, 401)
@@ -241,7 +246,7 @@ const app = new Hono()
             )
 
 
-            const member = await getMember({ databases, workspaceId: existingTask.workspaceId, userId: user.$id })
+            const member = await getMember({ databases, workspaceId: existingTask.workspaceId, userId: user.id })
 
             if (!member) {
                 return c.json({ error: "未授权" }, 401)
@@ -304,7 +309,7 @@ const app = new Hono()
                 return c.json({ error: "缺少workspaceId" }, 400)
             }
 
-            const member = await getMember({ databases, workspaceId, userId: user.$id })
+            const member = await getMember({ databases, workspaceId, userId: user.id })
             if (!member) {
                 return c.json({ error: "未授权" }, 401)
             }

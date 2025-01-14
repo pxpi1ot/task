@@ -31,7 +31,7 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId,
-                userId: user.$id
+                userId: user.id
             })
 
             if (!member) {
@@ -66,7 +66,7 @@ const app = new Hono()
 
             const member = await getMember({
                 databases,
-                userId: user.$id,
+                userId: user.id,
                 workspaceId: project.workspaceId
             })
 
@@ -88,7 +88,7 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId,
-                userId: user.$id
+                userId: user.id
             })
 
             if (!member) {
@@ -147,7 +147,7 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId: existingProject.workspaceId,
-                userId: user.$id
+                userId: user.id
             })
 
             if (!member) {
@@ -203,7 +203,7 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId: existingProject.workspaceId,
-                userId: user.$id
+                userId: user.id
             })
 
             if (!member) {
@@ -234,7 +234,7 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId: project.workspaceId,
-                userId: user.$id
+                userId: user.id
             })
 
             if (!member) {

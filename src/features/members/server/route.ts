@@ -21,7 +21,7 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId,
-                userId: user.$id
+                userId: user.id
             })
             if (!member) {
                 return c.json({ error: "不是该工作区成员！" }, 401)
@@ -34,12 +34,13 @@ const app = new Hono()
             )
 
             const populatedMembers = await Promise.all(members.documents.map(async member => {
-                const user = await users.get(member.userId)
+                const user = await users.getUser(member.userId)
 
                 return {
                     ...member,
-                    name: user.name || user.email,
-                    email: user.email,
+                    name: user.username || user.emailAddresses[0].emailAddress,
+                    email: user.emailAddresses[0].emailAddress,
+                    imageUrl: user.imageUrl
                 }
             }))
 
@@ -73,7 +74,7 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId: memberToDelete.workspaceId,
-                userId: user.$id
+                userId: user.id
             })
 
             if (!member) {
@@ -123,7 +124,7 @@ const app = new Hono()
             const member = await getMember({
                 databases,
                 workspaceId: memberToUpdate.workspaceId,
-                userId: user.$id
+                userId: user.id
             })
 
             if (!member) {
